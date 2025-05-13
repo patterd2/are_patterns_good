@@ -12,7 +12,7 @@ X = LinRange(0, L, Nx)
 dx = L / (Nx - 1)
 
 # Parameters associated with the Keller-Segel model
-parKS = (Dn = 0.1, Dc = 0.1, χ = 0.55, α = 0.5, β = 1.0, r = 1.0, K = 2.0)
+parKS = (Dn = 0.1, Dc = 0.1, χ = 0.55, α = 0.5, β = 1.0, K = 2.0)
 
 # Define the functional for the Keller-Segel model
 function R_KS(u, par)
@@ -54,7 +54,7 @@ function R_KS(u, par)
     end
 
     # Update equations
-    @. dn = Dn * ∂²n∂x² - χ * ∂n∂c∂x + r * n * (1 - n / K)
+    @. dn = Dn * ∂²n∂x² - χ * ∂n∂c∂x + n * (1 - n / K)
     @. dc = Dc * ∂²c∂x² + α * n - β * c
 
     return out
@@ -68,7 +68,7 @@ sol0 = [fill(parKS.K, Nx); fill(parKS.K*parKS.α/parKS.β, Nx)]
 
 # Bifurcation Problem
 prob = BifurcationProblem(R_KS, sol0, parKS, (@lens _.χ);
-    record_from_solution = (x, p) -> (n2 = dx*sum(x), s = sum(x)),
+    record_from_solution = (x, p) -> (n2 = dx*sum(x[1:Nx]), s = sum(x)),
     plot_solution = (x, p; kwargs...) -> (plot!(X[1:Nx], x[1:Nx]; ylabel="n(x)", label="x", kwargs...))
 )
 
@@ -144,7 +144,7 @@ plot!(br2, plotfold=true, linewidthstable = 3, markersize = 2,linestyle=:dot)
 plot!(br3, plotfold=true, linewidthstable = 3, markersize = 2,linestyle=:dot)
 #plot!(br4, plotfold=true, linewidthstable = 3, markersize = 2)
 #plot!(br_pattern, plotfold=true, linewidthstable = 3, markersize = 2)
-plot!(ylabel=latexstring("‖u~‖_{L_1}"), 
+plot!(ylabel=latexstring("‖n~‖_{L_1}"), 
     xlabel=latexstring("χ"),
     yguidefontrotation=-90,
     left_margin=14mm,
