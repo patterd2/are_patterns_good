@@ -12,11 +12,11 @@ X = LinRange(0, L, Nx)
 dx = L / (Nx - 1)
 
 # Parameters associated with the Keller-Segel model
-parKS = (Dn = 0.1, Dc = 0.1, χ = 0.55, α = 0.5, β = 1.0, K = 2.0)
+parKS = (Dn = 0.1, Dc = 0.1, χ = 0.4, α = 0.5, β = 1.0, K = 2.0)
 
 # Define the functional for the Keller-Segel model
 function R_KS(u, par)
-    @unpack Dn, Dc, χ, α, β, r, K = par
+    @unpack Dn, Dc, χ, α, β, K = par
     n = @view u[1:Nx]
     c = @view u[Nx+1:2Nx]
     out = similar(u)
@@ -89,22 +89,13 @@ opts_pos = ContinuationPar(
     max_steps = 1000,
     plot_every_step = 1
 )
-opts_neg = ContinuationPar(
-    dsmin = 0.00001,
-    dsmax = 0.01,
-    ds = -0.01,
-    p_min = 0.3,    
-    p_max = 0.6,
-    newton_options = NewtonPar(max_iterations = 30, tol = 1e-10),
-    max_steps = 300,
-    plot_every_step = 1
-)
+
 opts_care = ContinuationPar(
     dsmin = 0.0000001,
-    dsmax = 0.001,
-    ds = 0.001,
-    p_min = 0.35,    
-    p_max = 0.5,
+    dsmax = 0.005,
+    ds = 0.005,
+    p_min = 0.3,    
+    p_max = 0.6,
     newton_options = NewtonPar(max_iterations = 50, tol = 1e-12),
     max_steps = 1000,
     plot_every_step = 1
@@ -123,25 +114,34 @@ br = continuation(prob, PALC(), opts_care;
 
 br2 = continuation(br, 2, opts_care;
 	plot = true, verbosity = 1,
-	normC = norminf)
+	normC = norminf, bothside = true)
 
 # determine the nature of a bifurcation point
 # hopfpt = get_normal_form(br2,1)
 
-br3 = continuation(br, 2, opts_care;
-	plot = true, verbosity = 1,
-	normC = norminf)
+#br3 = continuation(br, 2, opts_care;
+#	plot = true, verbosity = 1,
+#	normC = norminf)
 
 # follow the unstable branch from primary BP
 #br4 = continuation(br, 4, opts_pos;
 #	plot = false, verbosity = 1,
 #	normC = norminf) 
 
-
 # Plot the bifurcation diagram with manual branch switching
-plot(br, plotfold=true, linewidthstable = 3, markersize = 2,linestyle=:dot)
-plot!(br2, plotfold=true, linewidthstable = 3, markersize = 2,linestyle=:dot)
-plot!(br3, plotfold=true, linewidthstable = 3, markersize = 2,linestyle=:dot)
+col = [stb ? :red : :black for stb in br.branch.stable]
+branch_style = [stb ? :solid : :solid for stb in br.branch.stable]
+plot(br, plotfold=true, linewidth = 2, linestyle = branch_style, 
+    markersize = 2, color=col, plotspecialpoints=false)
+
+col2 = [stb ? :red : :black for stb in br2.branch.stable]
+branch_style2 = [stb ? :dash : :dash for stb in br2.branch.stable]
+#plot!(br2, plotfold=true, linewidth = 2, linewidthstable=4, linewidthunstable=1, 
+#    markersize = 2, plotspecialpoints=true)
+plot!(br2, plotfold=true, linewidth = 2, linestyle = branch_style2, 
+    markersize = 2, color=col2, plotspecialpoints=true)
+
+    #plot!(br3, plotfold=true, linewidthstable = 3, markersize = 2,linestyle=:dot)
 #plot!(br4, plotfold=true, linewidthstable = 3, markersize = 2)
 #plot!(br_pattern, plotfold=true, linewidthstable = 3, markersize = 2)
 plot!(ylabel=latexstring("‖n~‖_{L_1}"), 
@@ -151,8 +151,8 @@ plot!(ylabel=latexstring("‖n~‖_{L_1}"),
     bottom_margin=2mm,
     xguidefontsize=20,
     yguidefontsize=20,
-    xlim=(0.401, 0.405), 
-    ylim=(30.074, 30.076))
+    xlim=(0.3, 0.6), 
+    ylim=(14, 22))
 
 
 
