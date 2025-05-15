@@ -40,15 +40,20 @@ println("Unstable wave numbers: ", findall(!iszero, unstable_wave_numbers))
 
 # Define function
 f(x1, y1) = y1 - ((y1*Dn + Dc - α*x1*K)^2)/(4*Dn*Dc)
-
+g(x1,y1) = y1*Dn + Dc - α*x1*K
 # Compute grid values
 z = [f(xi, yi) for xi in χ_range, yi in β_range]  # note: y rows, x columns
 
+z2 = [g(xi, yi) for xi in χ_range, yi in β_range]
+
+z3 =  (z .< 0) .& (z2 .< 0)
+
 # Plot heatmap
 # Define French flag gradient: blue → white → red
-french_flag = cgrad([RGB(1,1,1), RGB(1,0,0)], 256)
+custom_cmap = cgrad([RGB(1,1,1), RGB(1,0,0)], 256)
+french_flag_cmap = cgrad([:blue, :white, :red], scale = :linear)
 
-heatmap(χ_range, β_range, -sign.(transpose(z)), c=french_flag, 
+heatmap(χ_range, β_range, transpose(z3), c=french_flag_cmap, clim=(-1,1),
     xlabel=latexstring("χ"), ylabel=latexstring("β"), colorbar=false, yguidefontrotation=-90,
     xguidefontsize=20, yguidefontsize=20, left_margin=10mm, bottom_margin=2mm)
 annotate!(0.32, 2.7, text("Homogeneous \nsolution stable", :black, 12))

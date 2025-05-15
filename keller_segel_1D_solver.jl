@@ -7,10 +7,9 @@ Tmax = 500.0          # Maximum time
 # Parameters
 Dn = 0.1
 Dc = 0.1
-χ = 0.403
+χ = 0.5
 α = 0.5
 β = 1.0
-r = 1.0
 K = 2.0
 
 # Spatial and temporal grid
@@ -63,12 +62,13 @@ function pde_system!(du, u, p, t)
     end
 
     # Update equations
-    @. dn = Dn * ∂²n∂x² - χ * ∂n∂c∂x + r * n * (1 - n / K)
+    @. dn = Dn * ∂²n∂x² - χ * ∂n∂c∂x + n * (1 - n / K)
     @. dc = Dc * ∂²c∂x² + α * n - β * c
 end
 
 # Initial conditions vector
-#u0 = [n0.(x); c0.(x)]  # Combine initial conditions for n and c
+
+# u0 = [n0.(x); c0.(x)]  # Combine initial conditions for n and c
 
 u0 = [sol.u[2][1:Nx]; sol.u[2][Nx+1:2Nx]] # continue from previous solution
 
@@ -82,5 +82,5 @@ tspan = (0.0, Tmax)
 end
 
 # Plot results (only the final state is available)
-plot(x, sol.u[2][1:Nx], label="n(x, t=T_max)", xlabel="x", ylabel="y")
-plot!(x, sol.u[2][Nx+1:2Nx], label="c(x, t=T_max)", xlabel="x", ylabel="y")
+plot(x, sol.u[2][1:Nx], label=latexstring("n(x, t = 500)"), xlabel="x")
+plot!(x, sol.u[2][Nx+1:2Nx], label=latexstring("c(x, t = 500)"), xlabel="x")
