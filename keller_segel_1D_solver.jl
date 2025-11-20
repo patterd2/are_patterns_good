@@ -1,16 +1,16 @@
 # Keller-Segel model with logistic growth 
 using DifferentialEquations
-using Plots
+using Plots, LaTeXStrings
 
 Tmax = 500.0          # Maximum time
 
 # Parameters
 Dn = 0.1
 Dc = 0.1
-χ = 0.5
+χ = 0.165
 α = 0.5
 β = 1.0
-K = 2.0
+K = 5.0
 
 # Spatial and temporal grid
 L = 10.0              # Length of the domain
@@ -18,9 +18,9 @@ Nx = 400             # Number of spatial points
 dx = L / (Nx - 1)
 x = LinRange(0, L, Nx) # Spatial grid
 
-# Initial conditions
-n0(x) = exp(-((x - L/2)^2) / 2.0)
-c0(x) = 0.5 * exp(-((x - L/2)^2) / 2.0)
+# Initial conditions 3ones(Nx) .+ cos.(2x/L) .+ sin.(3x/L) # 3ones(Nx) .+ cos.(x/L) .+ sin.(5x/L) # 
+n0(x) = (K)ones(Nx) .+ 0.02cos.(3x/L) .+ 0.02sin.(5x/L) # 3ones(Nx) .+ cos.(x/L) .+ sin.(5x/L) #
+c0(x) = (K*α/β)ones(Nx) .+ 0.02cos.(2x/L) .+ 0.02sin.(x/L) # 3ones(Nx) .+ cos.(x/L) .+ sin.(5x/L) #
 
 # PDE system with aggregation term
 function pde_system!(du, u, p, t)
@@ -68,9 +68,9 @@ end
 
 # Initial conditions vector
 
-# u0 = [n0.(x); c0.(x)]  # Combine initial conditions for n and c
+u0 = vcat(n0(x), c0(x))  # Combine initial conditions for n and c
 
-u0 = [sol.u[2][1:Nx]; sol.u[2][Nx+1:2Nx]] # continue from previous solution
+# u0 = [sol.u[2][1:Nx]; sol.u[2][Nx+1:2Nx]] # continue from previous solution
 
 # Time span
 tspan = (0.0, Tmax)
@@ -84,3 +84,4 @@ end
 # Plot results (only the final state is available)
 plot(x, sol.u[2][1:Nx], label=latexstring("n(x, t = 500)"), xlabel="x")
 plot!(x, sol.u[2][Nx+1:2Nx], label=latexstring("c(x, t = 500)"), xlabel="x")
+
